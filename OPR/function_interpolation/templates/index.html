@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<!-- This script got from frontendfreecode.com -->
+    <meta charset="UTF-8">
 
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-body {
-    background: #0083B0;
-    background: -webkit-linear-gradient(to right, #0083B0, #00B4DB);
-    background: linear-gradient(to right, #0083B0, #00B4DB);
-    min-height: 100vh;
-}
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href=”http://cdn.pydata.org/bokeh/release/bokeh-2.4.3.min.css" rel=”stylesheet” type=”text/css”>
+    <link href=”http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.4.3.min.css"
+          rel=”stylesheet” type=”text/css”>
+    <style>
+        body {
+            background: #0083B0;
+            background: -webkit-linear-gradient(to right, #0083B0, #00B4DB);
+            background: linear-gradient(to right, #0083B0, #00B4DB);
+            min-height: 100vh;
+        }
 
-.form-control::placeholder {
-    font-style: italic;
-    font-size: 0.85rem;
-    color: #aaa;
-}
-</style>
+        .form-control::placeholder {
+            font-style: italic;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .table-responsive {
+            max-height: 300px;
+        }
+    </style>
 
 </head>
 <body>
@@ -32,8 +41,13 @@ body {
         <div class="col-lg-8 ">
             <div class="card rounded-0 border-0 shadow">
                 <div class="card-body p-5">
-                    
-               asdasdasdasdasd
+                    <div style="width: 70%">
+
+                        {{div | safe}}
+
+
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -41,68 +55,109 @@ body {
         <div class="col-lg-3 ">
             <div class="card rounded-0 border-0 shadow">
                 <div class="card-body p-5">
-                    
+
                     <!--  Bootstrap table-->
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
+                    <form action="" method="post">
+                        {%csrf_token%}
+                        <div class="table-responsive">
+
+                            <table class="table">
+                                <thead>
                                 <tr>
                                     <th scope="col">#</th>
                                     <th scope="col">X</th>
                                     <th scope="col">Y</th>
-                                    
+
                                     <th scope="col"></th>
                                 </tr>
-                            </thead>
-                            <tbody>
-                               
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
 
-                    <!-- Add rows button-->
-                    <a class="btn btn-primary rounded-0 btn-block" id="insertRow" href="#">Add new row</a>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Add rows button-->
+                        <a class="btn btn-primary rounded-0 btn-block" id="insertRow" href="#">Добавить точку</a>
+                        <button class="btn btn-primary rounded-0 btn-block" id="submit" type="submit">Расчитать</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</div><div id="bcl"><a style="font-size:8pt;text-decoration:none;" href="http://www.devanswer.com">Free Frontend</a></div>
-<script>
-$(function () {
+    <div class="row" style="margin-top: 15px">
+        <div class="col-lg-8 ">
+            <div class="card rounded-0 border-0 shadow">
+                <div class="card-body p-5">
+                    <table class="table table-hover table-bordered table-sm table-responsive">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">x</th>
+                            <th scope="col">y</th>
 
-    // Start counting from the third row
-    var counter = 1;
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for x,y in xy%}
 
-    $("#insertRow").on("click", function (event) {
-        event.preventDefault();
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{x}}</td>
+                            <td>{{y}}</td>
 
-        var newRow = $("<tr>");
-        var cols = '';
+                        </tr>
+                        {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // Table columns
-        cols += '<th scrope="row">' + counter + '</th>';
-        cols += '<td><input class="form-control rounded-0" type="text" name="x[]" placeholder=""></td>';
-        cols += '<td><input class="form-control rounded-0" type="text" name="y[]" placeholder=""></td>';
-        
-        cols += '<td><button class="btn btn-danger rounded-0" id ="deleteRow"><i class="fa fa-trash"></i></button</td>';
-
-        // Insert the columns inside a row
-        newRow.append(cols);
-
-        // Insert the row inside a table
-        $("table").append(newRow);
-
-        // Increase counter after each row insertion
-        counter++;
-    });
-
-    // Remove row when delete btn is clicked
-    $("table").on("click", "#deleteRow", function (event) {
-        $(this).closest("tr").remove();
-        counter -= 1
-    });
-});
-</script>
 
 </body>
+<script>
+    $(function () {
+
+        // Start counting from the third row
+        var counter = 1;
+
+        $("#insertRow").on("click", function (event) {
+            event.preventDefault();
+
+            var newRow = $("<tr>");
+            var cols = '';
+
+            // Table columns
+            cols += '<th scrope="row">' + counter + '</th>';
+            cols += '<td><input class="form-control rounded-0" type="text" name="x" placeholder=""></td>';
+            cols += '<td><input class="form-control rounded-0" type="text" name="y" placeholder=""></td>';
+
+            cols += '<td><button class="btn btn-danger rounded-0" id ="deleteRow"><i class="fa fa-trash"></i></button</td>';
+
+            // Insert the columns inside a row
+            newRow.append(cols);
+
+            // Insert the row inside a table
+            $("table").append(newRow);
+
+            // Increase counter after each row insertion
+            counter++;
+        });
+
+        // Remove row when delete btn is clicked
+        $("table").on("click", "#deleteRow", function (event) {
+            $(this).closest("tr").remove();
+            counter -= 1
+        });
+    });
+</script>
+
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.3.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.3.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.3.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.4.3.min.js"></script>
+{{script| safe}}
 </html>
