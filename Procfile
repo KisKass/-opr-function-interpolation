@@ -1,3 +1,1 @@
-web: gunicorn OPR.wsgi:application --log-file - --log-level debug
-python manage.py collectstatic --noinput
-manage.py migrate
+web: cd OPR/ && python manage.py migrate && gunicorn opr.wsgi
