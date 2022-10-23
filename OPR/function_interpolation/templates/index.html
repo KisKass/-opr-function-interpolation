@@ -37,11 +37,11 @@
 
 <div class="container-fluid ">
     <div class="row">
-
+        {% if not empty%}
         <div class="col-lg-8 ">
             <div class="card rounded-0 border-0 shadow">
                 <div class="card-body p-5">
-                    <div style="width: 70%">
+                    <div style="width: 100%">
 
                         {{div | safe}}
 
@@ -51,8 +51,11 @@
                 </div>
             </div>
         </div>
-
+        {%endif%}
+        {%if not empty%}
         <div class="col-lg-3 ">
+            {% else %} <div class="col-lg-6 " style="margin-left: auto;
+    margin-right: auto;">{% endif%}
             <div class="card rounded-0 border-0 shadow">
                 <div class="card-body p-5">
 
@@ -61,7 +64,7 @@
                         {%csrf_token%}
                         <div class="table-responsive">
 
-                            <table class="table">
+                            <table class="table" name="input_val">
                                 <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -85,6 +88,7 @@
             </div>
         </div>
     </div>
+     {% if not  empty%}
     <div class="row" style="margin-top: 15px">
         <div class="col-lg-8 ">
             <div class="card rounded-0 border-0 shadow">
@@ -94,17 +98,19 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">x</th>
-                            <th scope="col">y</th>
+                            <th scope="col">y (Кубический сплайн)</th>
+                            <th scope="col">y (Полиномиальная интерполяция)</th>
 
                         </tr>
                         </thead>
                         <tbody>
-                        {% for x,y in xy%}
+                        {% for x,y_cs,y_l in xy%}
 
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
                             <td>{{x}}</td>
-                            <td>{{y}}</td>
+                            <td>{{y_cs}}</td>
+                            <td>{{y_l}}</td>
 
                         </tr>
                         {%endfor%}
@@ -114,6 +120,7 @@
             </div>
         </div>
     </div>
+    {%endif%}
 </div>
 
 
@@ -141,14 +148,14 @@
             newRow.append(cols);
 
             // Insert the row inside a table
-            $("table").append(newRow);
+            $('table[name="input_val"]').append(newRow);
 
             // Increase counter after each row insertion
             counter++;
         });
 
         // Remove row when delete btn is clicked
-        $("table").on("click", "#deleteRow", function (event) {
+        $('table[name="input_val"]').on("click", "#deleteRow", function (event) {
             $(this).closest("tr").remove();
             counter -= 1
         });
