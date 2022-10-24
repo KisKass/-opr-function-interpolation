@@ -1,4 +1,5 @@
 import mpld3
+from bokeh.core.enums import Enumeration
 from bokeh.embed import components
 from bokeh.models import HoverTool
 from django.shortcuts import render
@@ -8,18 +9,24 @@ from django.shortcuts import render
 
 def index(request):
     from scipy.interpolate import CubicSpline, lagrange
-
+    import random
     import numpy as np
     import matplotlib.pyplot as plt
 
     plt.style.use('seaborn-poster')
     if request.POST:
-
-        x = [int(val) for val in request.POST.getlist('x')]
-        y = [int(val) for val in request.POST.getlist('y')]
+        print('1')
+        if "random" in request.POST:
+            print('11')
+            x =sorted(random.sample(range(0, 100), 5))
+            print(x)
+            y = random.sample(range(0, 100), 5)
+        else:
+            x = [int(val) for val in request.POST.getlist('x')]
+            y = [int(val) for val in request.POST.getlist('y')]
         # use bc_type = 'natural' adds the constraints as we described above
         CS = CubicSpline(x, y, bc_type='natural')
-        x_cs = np.linspace(min(x), max(x), 100)
+        x_cs = np.arange(0, 100)
         y_cs = CS(x_cs)
         LI = lagrange(x, y)
         x_l = x_cs
@@ -33,46 +40,41 @@ def index(request):
         # create a new plot with a title and axis labels
         p = figure(title="Интерполяция функций", x_axis_label="x", y_axis_label="y",
                    sizing_mode="stretch_both", toolbar_location="below")
-
+        # p.legend.location = "bottom_left"
+        # p.legend.background_fill_alpha = 0.5
         # add a line renderer with legend and line thickness
-        p.line(x=x_cs, y=y_cs, name="Кубический сплайн", legend_label="Кубический сплайн", line_width=3)
-        p.line(x_l, y_l, legend_label="Лагранж", line_width=3, color='red')
-        p.dot(x, y, legend_label="Исходные точки", line_width=3, color='green', size=25)
-        hover = HoverTool()
-        hover.tooltips = [
-            ("index", "$index"),
+        line1 = p.line(x=x_cs, y=y_cs, name="Кубический сплайн", legend_label="Кубический сплайн", line_width=3)
+        line2 = p.line(x_l, y_l, legend_label="Полином Лагранжа", line_width=3, name="Полином Лагранжа", color='red')
+        dot = p.dot(x, y, legend_label="Исходная точка", name='Исходная точка', line_width=3, color='green', size=25)
+        hover1 = HoverTool(tooltips=[
             ("name", "$name"),
-            # ("(x_cs,y_cs,y_l)", "($x_cs, $y_cs, $y_l)"),
-            ("(x,y)", "($x, $y)"),
-            ("desc", "@desc"),
-        ]
-        # hover.anchor='left'
-        hover.mode = 'vline'
+            ("(x,y)", "(@x, @y)"),
+        ], attachment='left', renderers=[line1], mode='vline')
+        hover2 = HoverTool(tooltips=[
+            ("name", "$name"),
+            ("(x,y)", "(@x, @y)"),
+        ], attachment='right', renderers=[line2], mode='vline')
+        hover3 = HoverTool(tooltips=[
+            ("name", "$name"),
+            ("(x,y)", "(@x, @y)"),
+        ], attachment='vertical', renderers=[dot])
+        # hover.tooltips = [
+        #     ("name", "$name"),
+        #     ("(x,y)", "(@x, @y)"),
+        # ]
+        # hover.attachment='above'
+        # hover.renderers=[line1]
+        # hover.mode = 'vline'
         # hover.point_policy = 'snap_to_data'
-        p.add_tools(hover)
+        p.add_tools(hover1)
+        p.add_tools(hover2)
+        p.add_tools(hover3)
         # show the results
+
         script, div = components(p)
 
-        # fig, ax1 = plt.subplots(figsize=(10, 6))
-        # ax1.plot(x_new, y_new, 'b')
-        # ax1.plot(x, y, 'ro')
-        # plt.title('Cubic Spline Interpolation')
-        # plt.xlabel('x')
-        # plt.ylabel('y')
-        #
         # labels = [f'x: {a}<br>y: {b}' for a, b in zip(x, y)]
-        #
-        # position = mpld3.plugins.MousePosition()
-        # mpld3.plugins.connect(fig, position)
-        #
-        # # tooltip = mpld3.plugins.PointLabelTooltip(fig, labels=labels)
-        # tooltip = mpld3.plugins.PointHTMLTooltip(fig, labels=labels)
-        # mpld3.plugins.connect(fig, tooltip)
-        #
-        # # print(labels)
-        # # plt.show()
-        # html_str = mpld3.fig_to_html(fig) "html_str": html_str,
 
         return render(request, "index.html", {"xy": zip(x_cs, y_cs, y_l), 'script': script, 'div': div})
     else:
-        return render(request, "index.html", {"empty":True})
+        return render(request, "index.html", {"empty": True})
