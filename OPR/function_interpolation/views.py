@@ -123,11 +123,11 @@ def generate_excel(x_cs, y_cs, y_l):
         'align': 'center',
         'valign': 'vcenter',
     })
-    worksheet.merge_range('A1:B1', 'Результат интерполяции', merge_format)
+    worksheet.merge_range('A1:С1', 'Результат интерполяции', merge_format)
 
     worksheet.write('A2', 'Х')
     worksheet.write('B2', 'Кубический сплайн')
-    worksheet.write('B2', 'Полином Лагранжа')
+    worksheet.write('С2', 'Полином Лагранжа')
 
     col = 0
     row = 2
