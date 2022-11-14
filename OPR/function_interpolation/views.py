@@ -42,7 +42,11 @@ def index(request):
         global y_cs
         global y_l
         CS = CubicSpline(x, y, bc_type='natural')
-        x_cs = np.arange(0, 100)
+        if max(x)<100:
+            x_lim=100
+        else: x_lim = max(x)
+        print(x,max(x),x_lim)
+        x_cs = np.arange(0,x_lim+1)
         y_cs = CS(x_cs)
         LI = lagrange(x, y)
         x_l = x_cs
