@@ -1,7 +1,11 @@
+import io
+
 import mpld3
+import xlsxwriter
 from bokeh.core.enums import Enumeration
 from bokeh.embed import components
 from bokeh.models import HoverTool
+from django.http import HttpResponse
 from django.shortcuts import render
 
 
@@ -78,3 +82,81 @@ def index(request):
         return render(request, "index.html", {"xy": zip(x_cs, y_cs, y_l), 'script': script, 'div': div})
     else:
         return render(request, "index.html", {"empty": True})
+
+
+def generate_excel(data):
+    import os
+
+    # path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hello.xlsx')
+    try:
+        os.remove('hello.xlsx')
+    except:
+        pass
+    # Create an in-memory output file for the new workbook.
+    output = io.BytesIO()
+
+    # Even though the final file will be in memory the module uses temp
+    # files during assembly for efficiency. To avoid this on servers that
+    # don't allow temp files, for example the Google APP Engine, set the
+    # 'in_memory' Workbook() constructor option as shown in the docs.
+    workbook = xlsxwriter.Workbook(output)
+
+    worksheet = workbook.add_worksheet()
+
+    merge_format = workbook.add_format({
+        'align': 'center',
+        'valign': 'vcenter',
+        })
+    worksheet.merge_range('A1:B1', 'Распределение средств по отделам на {{date}}', merge_format)
+
+    worksheet.write('A2', 'Отдел')
+    worksheet.write('B2', 'Сумма')
+
+    col = 0
+    row = 2
+    for dep in data['dep']:
+        worksheet.write(row, col, dep)
+        row += 1
+
+    col = 1
+    row = 2
+    for sum in data['sum']:
+        worksheet.write(row, col, float(sum))
+        row += 1
+
+    col=0
+    worksheet.write(row, col, 'Итого')
+    worksheet.write_formula(row, col+1, f'=SUM(B{3}:B{row})')
+
+    row+=1
+    worksheet.write(row, col, 'Баланс')
+    worksheet.write_formula(row, col+1, f'={data["balance"]["Balance"]} - B{row-1}')
+
+    # Create a new chart object.
+    chart = workbook.add_chart({'type': 'column'})
+
+    # Add a series to the chart.
+    chart.add_series({
+        'categories': ['Sheet1', 2, 0, row-2, 0],
+        'values': ['Sheet1', 2, 1, row-2, 1],
+        'line': {'color': 'red'},
+    })
+
+    # Insert the chart into the worksheet.
+    worksheet.insert_chart('D1', chart)
+
+    # Close the workbook before sending the data.
+    workbook.close()
+
+    # Rewind the buffer.
+    output.seek(0)
+
+    # Set up the Http response.
+    filename = 'otchet.xlsx'
+    response = HttpResponse(
+        output,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    return response
