@@ -4,6 +4,7 @@ from . import views  # it means - 'from all import views'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('excel', views.excel, name='excel'),
     # path('new_points', views.new_points, name='new_points'),
 
 ]

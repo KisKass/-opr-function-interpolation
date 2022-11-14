@@ -8,8 +8,16 @@ from bokeh.models import HoverTool
 from django.http import HttpResponse
 from django.shortcuts import render
 
-
 # Create your views here.
+global x_cs
+global y_cs
+global y_l
+
+
+def excel(request):
+    responce = generate_excel(x_cs, y_cs, y_l)
+    return responce
+
 
 def index(request):
     from scipy.interpolate import CubicSpline, lagrange
@@ -19,16 +27,20 @@ def index(request):
 
     plt.style.use('seaborn-poster')
     if request.POST:
+
         print('1')
         if "random" in request.POST:
             print('11')
-            x =sorted(random.sample(range(0, 100), 5))
+            x = sorted(random.sample(range(0, 100), 5))
             print(x)
             y = random.sample(range(0, 100), 5)
         else:
             x = [int(val) for val in request.POST.getlist('x')]
             y = [int(val) for val in request.POST.getlist('y')]
         # use bc_type = 'natural' adds the constraints as we described above
+        global x_cs
+        global y_cs
+        global y_l
         CS = CubicSpline(x, y, bc_type='natural')
         x_cs = np.arange(0, 100)
         y_cs = CS(x_cs)
@@ -84,7 +96,7 @@ def index(request):
         return render(request, "index.html", {"empty": True})
 
 
-def generate_excel(data):
+def generate_excel(x_cs, y_cs, y_l):
     import os
 
     # path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'hello.xlsx')
@@ -106,42 +118,45 @@ def generate_excel(data):
     merge_format = workbook.add_format({
         'align': 'center',
         'valign': 'vcenter',
-        })
-    worksheet.merge_range('A1:B1', 'Распределение средств по отделам на {{date}}', merge_format)
+    })
+    worksheet.merge_range('A1:B1', 'Результат интерполяции', merge_format)
 
-    worksheet.write('A2', 'Отдел')
-    worksheet.write('B2', 'Сумма')
+    worksheet.write('A2', 'Х')
+    worksheet.write('B2', 'Кубический сплайн')
+    worksheet.write('B2', 'Полином Лагранжа')
 
     col = 0
     row = 2
-    for dep in data['dep']:
-        worksheet.write(row, col, dep)
+    for r in x_cs:
+        worksheet.write(row, col, r)
         row += 1
 
     col = 1
     row = 2
-    for sum in data['sum']:
-        worksheet.write(row, col, float(sum))
+    for r in y_cs:
+        worksheet.write(row, col, (r))
         row += 1
 
-    col=0
-    worksheet.write(row, col, 'Итого')
-    worksheet.write_formula(row, col+1, f'=SUM(B{3}:B{row})')
-
-    row+=1
-    worksheet.write(row, col, 'Баланс')
-    worksheet.write_formula(row, col+1, f'={data["balance"]["Balance"]} - B{row-1}')
+    col = 2
+    row = 2
+    for r in y_l:
+        worksheet.write(row, col, (r))
+        row += 1
 
     # Create a new chart object.
-    chart = workbook.add_chart({'type': 'column'})
+    chart = workbook.add_chart({'type': 'line'})
 
-    # Add a series to the chart.
+    # Configure the first series.
     chart.add_series({
-        'categories': ['Sheet1', 2, 0, row-2, 0],
-        'values': ['Sheet1', 2, 1, row-2, 1],
-        'line': {'color': 'red'},
+        'name': 'Кубический сплайн',
+        'categories': f'=Sheet1!$A$3:$A${row - 2}',
+        'values': f'=Sheet1!$B$3:$B${row - 2}',
     })
-
+    chart.add_series({
+        'name': 'Полином Лагранжа',
+        'categories': f'=Sheet1!$A$3:$A${row - 2}',
+        'values': f'=Sheet1!$C$3:$C${row - 2}',
+    })
     # Insert the chart into the worksheet.
     worksheet.insert_chart('D1', chart)
 
