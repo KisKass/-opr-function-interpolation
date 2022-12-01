@@ -7,6 +7,7 @@ from bokeh.embed import components
 from bokeh.models import HoverTool
 from django.http import HttpResponse
 from django.shortcuts import render
+from numpy import sin
 
 # Create your views here.
 global x_cs
@@ -27,32 +28,33 @@ def index(request):
 
     plt.style.use('seaborn-poster')
     if request.POST:
-
-        print('1')
         if "random" in request.POST:
-            print('11')
             x = sorted(random.sample(range(0, 100), 5))
             print(x)
             y = random.sample(range(0, 100), 5)
         else:
-            x = [int(val) for val in request.POST.getlist('x')]
-            y = [int(val) for val in request.POST.getlist('y')]
+            x = [float(val) for val in request.POST.getlist('x')]
+            y = [float(val) for val in request.POST.getlist('y')]
         # use bc_type = 'natural' adds the constraints as we described above
         global x_cs
         global y_cs
         global y_l
 
-        if max(x)<100:
-            x_lim=100
-        else: x_lim = max(x)
-        print(x,max(x),x_lim)
+        if max(x) < 100:
+            x_lim = 100
+        else:
+            x_lim = max(x)
+        print(x, max(x), x_lim)
         CS = CubicSpline(x, y, bc_type='natural')
-        x_cs = np.arange(0,x_lim+1)
+        x_cs = np.arange(0, x_lim + 1)
         y_cs = CS(x_cs)
         LI = lagrange(x, y)
         x_l = x_cs
         y_l = LI(x_l)
-
+        # xt = x_cs
+        # yt = sin(xt*0.3)*100
+        # for x in xt:
+        #     print(x,yt[x])
         # bokeh try
         from bokeh.plotting import figure, show
 
@@ -66,6 +68,7 @@ def index(request):
         # add a line renderer with legend and line thickness
         line1 = p.line(x=x_cs, y=y_cs, name="Кубический сплайн", legend_label="Кубический сплайн", line_width=3)
         line2 = p.line(x_l, y_l, legend_label="Полином Лагранжа", line_width=3, name="Полином Лагранжа", color='red')
+        # line3 = p.line(xt, yt, legend_label='true function', line_width=3)
         dot = p.dot(x, y, legend_label="Исходная точка", name='Исходная точка', line_width=3, color='green', size=25)
         hover1 = HoverTool(tooltips=[
             ("name", "$name"),
@@ -124,11 +127,11 @@ def generate_excel(x_cs, y_cs, y_l):
         'align': 'center',
         'valign': 'vcenter',
     })
-    worksheet.merge_range('A1:C1', 'Результат интерполяции', merge_format)
+    worksheet.merge_range('A1:С1', 'Результат интерполяции', merge_format)
 
     worksheet.write('A2', 'Х')
     worksheet.write('B2', 'Кубический сплайн')
-    worksheet.write('C2', 'Полином Лагранжа')
+    worksheet.write('С2', 'Полином Лагранжа')
 
     col = 0
     row = 2
