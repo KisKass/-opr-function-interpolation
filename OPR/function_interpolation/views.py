@@ -41,11 +41,12 @@ def index(request):
         global x_cs
         global y_cs
         global y_l
-        CS = CubicSpline(x, y, bc_type='natural')
+
         if max(x)<100:
             x_lim=100
         else: x_lim = max(x)
         print(x,max(x),x_lim)
+        CS = CubicSpline(x, y, bc_type='natural')
         x_cs = np.arange(0,x_lim+1)
         y_cs = CS(x_cs)
         LI = lagrange(x, y)
@@ -123,11 +124,11 @@ def generate_excel(x_cs, y_cs, y_l):
         'align': 'center',
         'valign': 'vcenter',
     })
-    worksheet.merge_range('A1:С1', 'Результат интерполяции', merge_format)
+    worksheet.merge_range('A1:C1', 'Результат интерполяции', merge_format)
 
     worksheet.write('A2', 'Х')
     worksheet.write('B2', 'Кубический сплайн')
-    worksheet.write('С2', 'Полином Лагранжа')
+    worksheet.write('C2', 'Полином Лагранжа')
 
     col = 0
     row = 2
