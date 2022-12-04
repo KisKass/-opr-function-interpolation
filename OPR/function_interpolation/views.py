@@ -62,7 +62,7 @@ def index(request):
 
         # create a new plot with a title and axis labels
         p = figure(title="Интерполяция функций", x_axis_label="x", y_axis_label="y",
-                   sizing_mode="stretch_both", toolbar_location="below")
+                   sizing_mode="stretch_both", toolbar_location="below" ,tools="pan,wheel_zoom,save,box_zoom,reset")
         # p.legend.location = "bottom_left"
         # p.legend.background_fill_alpha = 0.5
         # add a line renderer with legend and line thickness
@@ -98,8 +98,8 @@ def index(request):
         script, div = components(p)
 
         # labels = [f'x: {a}<br>y: {b}' for a, b in zip(x, y)]
-
-        return render(request, "index.html", {"xy": zip(x_cs, y_cs, y_l), 'script': script, 'div': div})
+        xy = zip(x,y)
+        return render(request, "index.html", {"xy": zip(x_cs, y_cs, y_l), 'script': script, 'div': div,'start_points':xy})
     else:
         return render(request, "index.html", {"empty": True})
 

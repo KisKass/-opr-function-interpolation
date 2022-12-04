@@ -54,15 +54,33 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">О приложении</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            ...
+                            <p>Данное приложение предназначено для построения интерполированной функции по заданным точка.
+                            Реализовано 2 метода: Полином Лагранжа и Кубический сплайн.</p>
+                            <p>Для построения графика необходимо указать ввести точки по которым будет строится график. Для
+                            этого необходимо нажать кнопку "добавить точку" и ввести координаты этих точек. Также можно
+                            сгенерировать случайные точки при нажатии на кнопку "Сгенерировать случайно"</p>
+
+
+                            {%if not empty%}
+
+                            У графика есть некоторые инструменты:
+                            <ul>
+                                <li>pan - инструмент позволяющий перемещаться по графику. По умолчанию включен.</li>
+                                <li>Box Zoom - инструмент позволяющий выделить область графика и сделать ее активной.</li>
+                                <li>Wheel Zoom - использовать колесо мыши для приблежения.</li>
+                                <li>Save - сохранить текущую активную облать графика в файл.</li>
+                                <li>Reset - вернуть график к изначальному.</li>
+                                <li>Hover - инструмент показывающий значения точки на графике при наведении на неё курсора.</li>
+                                </ul>
+                            {%endif%}
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+
                         </div>
                     </div>
                 </div>
@@ -118,11 +136,13 @@
                             </div>
 
                             <!-- Add rows button-->
-                            <a class="btn btn-primary rounded-0  mb-1" id="insertRow" href="#" style="width: 100%">Добавить точку</a>
+                            <a class="btn btn-primary rounded-0  mb-1" id="insertRow" href="#" style="width: 100%">Добавить
+                                точку</a>
                             <button class="btn btn-primary rounded-0  mb-1" name="default" id="submit"
                                     type="submit" style="width: 100%">Рассчитать
                             </button>
-                            <button class="btn btn-primary rounded-0 mb-1" name="random" type="submit" style="width: 100%">
+                            <button class="btn btn-primary rounded-0 mb-1" name="random" type="submit"
+                                    style="width: 100%">
                                 Сгенерировать случайно
                             </button>
                         </form>
@@ -136,31 +156,78 @@
                 <div class="card rounded-0 border-0 shadow mb-3">
                     <div class="card-body p-3">
                         <div style="height: 400px;overflow: auto">
-                            <table class="table table-hover table-bordered table-sm table-responsive overflow-auto" >
-                            <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">x</th>
-                                <th scope="col">y (Кубический сплайн)</th>
-                                <th scope="col">y (Полиномиальная интерполяция)</th>
+                            <table class="table table-hover table-bordered table-sm table-responsive overflow-auto">
+                                <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">x</th>
+                                    <th scope="col">y (Кубический сплайн)</th>
+                                    <th scope="col">y (Полиномиальная интерполяция)</th>
 
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for x,y_cs,y_l in xy%}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for x,y_cs,y_l in xy%}
 
-                            <tr>
-                                <th scope="row">{{ forloop.counter }}</th>
-                                <td>{{x}}</td>
-                                <td>{{y_cs}}</td>
-                                <td>{{y_l}}</td>
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{x}}</td>
+                                    <td>{{y_cs}}</td>
+                                    <td>{{y_l}}</td>
 
-                            </tr>
+                                </tr>
 
-                            {%endfor%}
-                            <a href="excel" class="btn btn-success">Excel</a>
-                            </tbody>
-                        </table>
+                                {%endfor%}
+                                <a href="excel" class="btn btn-success mb-2 me-3">Excel</a>
+                                <button class="btn btn-warning mb-2 me-3" data-bs-toggle="modal"
+                                        data-bs-target="#start_points">Исходные точки
+                                </button>
+
+                                </tbody>
+                            </table>
+                            <!-- Modal -->
+                            <div class="modal fade" id="start_points" tabindex="-1"
+                                 aria-labelledby="exampleModalLabel"
+                                 aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="start_pointsLabel">Исходные точки</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div>
+                                                <table class="table">
+
+                                                    <thead>
+                                                    <tr>
+                                                        <th>x</th>
+                                                        <th>y</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for x,y in start_points %}
+                                                    <tr>
+                                                        <td>{{x}}</td>
+                                                        <td>{{y}}</td>
+                                                    </tr>
+
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Закрыть
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
